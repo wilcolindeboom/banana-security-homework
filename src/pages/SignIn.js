@@ -5,7 +5,7 @@ import {AuthContext} from '../context/AuthContext';
 
 function SignIn() {
     const history = useHistory();
-    const {isAuth, logIn} = useContext(AuthContext);
+    const {logIn} = useContext(AuthContext);
 
 
     function handleLogIn() {
