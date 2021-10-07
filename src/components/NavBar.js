@@ -5,11 +5,11 @@ import {AuthContext} from '../context/AuthContext';
 
 function NavBar() {
   const history = useHistory();
-  const {isAuth, toggleAuth } = useContext(AuthContext);
+  const {isAuth, logOff} = useContext(AuthContext);
 
 
   function handleLogOff() {
-    toggleAuth();
+    logOff();
     history.push('/');
   }
 
