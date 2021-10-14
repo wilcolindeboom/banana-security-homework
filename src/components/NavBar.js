@@ -10,7 +10,7 @@ function NavBar() {
 
   function handleLogOff() {
     logOff();
-    history.push('/');
+    // history.push('/');
   }
 
   function handleLogIn() {
