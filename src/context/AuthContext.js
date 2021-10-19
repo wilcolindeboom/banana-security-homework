@@ -3,6 +3,7 @@ import {createContext} from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import jwt_decode from 'jwt-decode';
 import axios from "axios";
+import {useEffect} from 'react';
 
 export const AuthContext = createContext({});
 
@@ -12,15 +13,31 @@ function AuthContextProvider({children}) {
     const [isAuth, toggleIsAuth] = useState(
         {
             isAuth:false,
-            user:null,
+            email:null,
+            username:null,
+            id:null,
             status:"pending",
         });
 
     const history = useHistory();
 
-    function toggleAuth() {
-        toggleIsAuth(!isAuth.isAuth);
-    }
+
+    useEffect( () => {
+
+        const JWT = localStorage.getItem('token');
+        if(JWT) {
+            console.log(`token found: ${JWT}`);
+            const decodedToken = jwt_decode(JWT);
+            const {sub} = decodedToken;
+
+            getUserData(JWT,sub);
+        } else {
+            toggleIsAuth({
+                ...isAuth,
+                status: 'done'
+            });
+        }
+    } ,[]);
 
    function logOff() {
        toggleIsAuth({
@@ -33,25 +50,50 @@ function AuthContextProvider({children}) {
 
     function logIn(JWT) {
         localStorage.setItem('token',JWT);
-
         const decodedToken = jwt_decode(JWT);
         const {sub} = decodedToken;
-        getUserData(JWT,sub);
+        loginUser(JWT,sub);
 
-        toggleIsAuth({
-            ...isAuth,
-            isAuth: true
-        });
-        console.log("user logged in!");
-        history.push('/profile');
+        async  function loginUser(JWT,id) {
+
+            console.log("token:" + JWT);
+            console.log("id:" + id);
+
+            try {
+                const result = await axios.get(`http://localhost:3000/600/users/${id}`,
+                    {headers: {'Authorization': `Bearer ${JWT}`}
+                    });
+                toggleIsAuth({
+                    ...isAuth,
+                    isAuth: true,
+                    email: result.data.email,
+                    username: result.data.username,
+                    id: result.data.id,
+                    });
+                history.push('/profile');
+            }
+            catch (error) {
+                if (error.response) {
+                    console.log(error.response.data);
+                    alert(error.response.data);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
+                } else if (error.request) {
+                    console.log(error.request);
+                } else {
+                    console.log('Error', error.message);
+                }
+                console.log(error.config);
+            }
+        }
     }
 
     const authData = {
         isAuth: isAuth.isAuth,
-        toggleAuth:toggleAuth,
         logOff:logOff,
         logIn:logIn
     };
+
 
 
     async  function getUserData(JWT,id) {
@@ -59,14 +101,19 @@ function AuthContextProvider({children}) {
         console.log("token:" + JWT);
         console.log("id:" + id);
 
-
         try {
-          const result = await axios.get(`http://localhost:3000/600/users/${id}`,
-              {headers: {'Authorization': `Bearer ${JWT}`}
+            const result = await axios.get(`http://localhost:3000/600/users/${id}`,
+                {headers: {'Authorization': `Bearer ${JWT}`}
+                });
+            toggleIsAuth({
+                ...isAuth,
+                isAuth: true,
+                email: result.data.email,
+                username: result.data.username,
+                id: result.data.id,
+                status: 'done'
             });
 
-            console.log(result.data);
-            console.log("get done");
         }
         catch (error) {
             if (error.response) {
@@ -85,13 +132,9 @@ function AuthContextProvider({children}) {
     }
 
 
-
-
-
-
     return (
         <AuthContext.Provider value= {authData}>
-            {children}
+            {isAuth.status === 'done' ? children : <p>Loading...</p>}
         </AuthContext.Provider>
     );
 

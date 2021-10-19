@@ -2,7 +2,6 @@ import React, {useContext} from 'react';
 import { Link } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import {AuthContext} from '../context/AuthContext';
-import InputField from '../components/InputField';
 import axios from "axios";
 
 
@@ -10,6 +9,7 @@ function SignIn() {
 
     const {logIn} = useContext(AuthContext);
     const { handleSubmit, register } = useForm();
+
 
     async  function postData(data) {
 
@@ -19,6 +19,7 @@ function SignIn() {
                    });
                console.log(result.data);
                logIn(result.data.accessToken);
+
            }
            catch (error) {
                if (error.response) {
