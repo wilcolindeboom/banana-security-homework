@@ -3,42 +3,43 @@ import { Link } from 'react-router-dom';
 import { useForm } from "react-hook-form";
 import {AuthContext} from '../context/AuthContext';
 import InputField from '../components/InputField';
+import axios from "axios";
 
 
 function SignIn() {
-    // const history = useHistory();
+
     const {logIn} = useContext(AuthContext);
-    // const { handleSubmit, formState: { errors }, register , watch } = useForm({mode:"onTouched"});
     const { handleSubmit, register } = useForm();
-    const onSubmit = (data) => alert(JSON.stringify(data));
 
+    async  function postData(data) {
 
-   async  function handleLogIn(e) {
+           try {
+               const result = await axios.post('http://localhost:3000/login',data,
+                   {headers: {'Content-Type':'application/json'}
+                   });
+               console.log(result.data);
+               logIn(result.data.accessToken);
+           }
+           catch (error) {
+               if (error.response) {
+                   console.log(error.response.data);
+                   alert(error.response.data);
+                   console.log(error.response.status);
+                   console.log(error.response.headers);
+               } else if (error.request) {
+                   console.log(error.request);
+               } else {
+                   console.log('Error', error.message);
+               }
+               console.log(error.config);
+           }
 
+       }
 
-       // try {
-       //
-       // }
-       //
-       // catch (e) {
-       //
-       //     console.error(e)
-       // }
-       //
-
-
-
-
-           // e.preventDefault();
-        logIn();
-        // history.push('/profile');
-    }
-
-
-    function onFormSubmit(data) {
+    function onSubmit(data) {
         console.log(data);
         console.log("submitted");
-        handleLogIn();
+        postData(data);
     }
 
 
@@ -47,42 +48,31 @@ function SignIn() {
       <h1>Inloggen</h1>
       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab alias cum debitis dolor dolore fuga id molestias qui quo unde?</p>
 
-        {/*<form className="form" onSubmit={handleSubmit(onSubmit)}>*/}
+            <form className="form" onSubmit={handleSubmit(onSubmit)}>
+                <label htmlFor="details-email">
+                    email
+                    <input
+                        type="email"
+                        id="details-email"
+                        {...register("email", {required: true})}
+                    />
+                </label>
 
-        {/*    <InputField id="details-login-name" label="Login:" type="email"*/}
-        {/*                {...register("loginName", {required: true})}*/}
-        {/*    />*/}
+                <label htmlFor="details-password">
+                    password
+                    <input
+                        type="password"
+                        id="details-password"
+                        {...register("password", {required: true})}
+                    />
+                </label>
 
-        {/*    <InputField id="details-password" label="Wachtwoord:" type="password"*/}
-        {/*                {...register("passWord", {required: true})}*/}
-        {/*    />*/}
-        {/*    <button type="submit"*/}
-        {/*      // onClick={() => onSubmit()}*/}
-        {/*    >*/}
-        {/*        Inloggen*/}
-        {/*    </button>*/}
-
-        {/*</form>*/}
-
-
-
-      <form>
-         <InputField id="details-login-name" label="email" type="email"
-              />
-
-          <InputField id="details-login-name" label="password" type="email"
-          />
-
-
-        <button
-            type="button"
-            onClick={() => handleLogIn()}
-        >
-            Inloggen
-        </button>
-      </form>
-
-      <p>Heb je nog geen account? <Link to="/signup">Registreer</Link> je dan eerst.</p>
+            <button type="submit"
+            >
+                Inloggen
+            </button>
+        </form>
+        <p>Heb je nog geen account? <Link to="/signup">Registreer</Link> je dan eerst.</p>
     </>
   );
 }
