@@ -13,9 +13,11 @@ function AuthContextProvider({children}) {
     const [isAuth, toggleIsAuth] = useState(
         {
             isAuth:false,
-            email:null,
-            username:null,
-            id:null,
+            user: {
+                email: null,
+                username: null,
+                id: null,
+            },
             status:"pending",
         });
 
@@ -45,6 +47,7 @@ function AuthContextProvider({children}) {
             isAuth: false
     });
        console.log("user logged off!");
+       localStorage.clear();
        history.push('/');
     }
 
@@ -66,9 +69,11 @@ function AuthContextProvider({children}) {
                 toggleIsAuth({
                     ...isAuth,
                     isAuth: true,
-                    email: result.data.email,
-                    username: result.data.username,
-                    id: result.data.id,
+                    user: {
+                        email: result.data.email,
+                        username: result.data.username,
+                        id: result.data.id
+                    },
                     });
                 history.push('/profile');
             }
@@ -108,10 +113,12 @@ function AuthContextProvider({children}) {
             toggleIsAuth({
                 ...isAuth,
                 isAuth: true,
-                email: result.data.email,
-                username: result.data.username,
-                id: result.data.id,
-                status: 'done'
+                user: {
+                    email: result.data.email,
+                    username: result.data.username,
+                    id: result.data.id
+                },
+               status: 'done'
             });
 
         }
